@@ -51,6 +51,7 @@ window.countNRooksSolutions = function(n) {
   return solutionCount;
 };
 
+
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
 
@@ -63,7 +64,7 @@ window.findNQueensSolution = function(n) {
     var child = new BoardTree(board, depth + 1);
     this.children.push(child);
   };
-
+  var solution = [];
   //debugger;
   var rootBoard = new Board({n: n});
   var root = new BoardTree(rootBoard, 0);
@@ -79,7 +80,8 @@ window.findNQueensSolution = function(n) {
     thisBoard.togglePiece(row, col);
     if (!thisBoard.hasAnyQueensConflicts()) {
       if (row === n - 1) {
-        return thisBoard;
+        solution = thisBoard.rows();
+        return;
       } //returns first working board
       parentNode.addChild(thisBoard, parentNode.depth + 1);
     }
@@ -94,20 +96,20 @@ window.findNQueensSolution = function(n) {
 
   recurseQueens(root, 0, 0); //populate root with decision tree
 
-  var rootLogger = function(root) {
-    if(root.depth === 4) { return root; }
-    if(root.children) {
-      for(var i = 0; i < root.children.length; i++) {
-        var solution = rootLogger(root.children[i]);
-        if(solution) {
-          return solution;
-        }
-      }
-    }
-    return false;
-  };
+  // var rootLogger = function(root) {
+  //   if(root.depth === 4) { return root; }
+  //   if(root.children) {
+  //     for(var i = 0; i < root.children.length; i++) {
+  //       var solution = rootLogger(root.children[i]);
+  //       if(solution) {
+  //         return solution;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // };
 
-  var solution = rootLogger(root).board.rows();
+  // var solution = rootLogger(root).board.rows();
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
   return solution;
