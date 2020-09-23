@@ -74,10 +74,13 @@ window.findNQueensSolution = function(n) {
 
     var thisBoard = new Board({n: n});
     //console.log(thisBoard.hasAnyQueensConflicts());
-    Object.assign(thisBoard.attributes, parentNode.board.attributes);
+    //Object.assign(thisBoard.attributes, parentNode.board.attributes);
+    thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
     thisBoard.togglePiece(row, col);
     if (!thisBoard.hasAnyQueensConflicts()) {
-      if (row === n - 1) { return thisBoard; } //returns first working board
+      if (row === n - 1) {
+        return thisBoard;
+      } //returns first working board
       parentNode.addChild(thisBoard, parentNode.depth + 1);
     }
     if (col < n - 1) {
@@ -89,13 +92,23 @@ window.findNQueensSolution = function(n) {
     }
   };
 
-  var solutionBoard = recurseQueens(root, 0, 0);
-  var solution = [];
-  if (solutionBoard) {
-    for (var i = 0; i < solutionBoard.attributes.n; i++) {
-      solution.push(solutionBoard.attributes[i]);
+  recurseQueens(root, 0, 0); //populate root with decision tree
+
+  var rootLogger = function(root) {
+    if(root.depth === 4) { return root; }
+    if(root.children) {
+      for(var i = 0; i < root.children.length; i++) {
+        var solution = rootLogger(root.children[i]);
+        if(solution) {
+          return solution;
+        }
+      }
     }
-  }
+    return false;
+  };
+
+  var solution = rootLogger(root).board.rows();
+
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
   return solution;
 };
