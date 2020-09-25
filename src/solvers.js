@@ -23,11 +23,10 @@
 
 window.findNRooksSolution = function(n) {
 
-  //debugger;
   var solution = new Board({n: n}); //fixme
   var row = 0;
   var col = 0;
-  while(row < n && row >= 0 && col < n && col >= 0) {
+  while (row < n && row >= 0 && col < n && col >= 0) {
     solution.togglePiece(row, col);
     row++;
     col++;
@@ -45,7 +44,7 @@ window.countNRooksSolutions = function(n) {
   if (n === 0) {
     return 1;
   }
-  var solutionCount = n * window.countNRooksSolutions(n-1); //fixme
+  var solutionCount = n * window.countNRooksSolutions(n - 1); //fixme
 
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
@@ -65,7 +64,7 @@ window.findNQueensSolution = function(n) {
     this.children.push(child);
   };
   var solution = [];
-  //debugger;
+  var numSolutions = 0;
   var rootBoard = new Board({n: n});
   var root = new BoardTree(rootBoard, 0);
 
@@ -82,7 +81,9 @@ window.findNQueensSolution = function(n) {
       if (row === n - 1) {
         //pass a correct solution
         solution = thisBoard.rows();
+        numSolutions++;
         return;
+
       }
       //queen placement was valid, add it to the valid children
       parentNode.addChild(thisBoard, parentNode.depth + 1);
@@ -90,33 +91,18 @@ window.findNQueensSolution = function(n) {
     if (col < n - 1) {
       //go again on the next column
       recurseQueens(parentNode, row, col + 1);
-      //otherwise,
+      //otherwise, start each child on the next row
     } else if (row < n - 1) {
-      for(var j = 0; j < parentNode.children.length; j++) {
+      for (var j = 0; j < parentNode.children.length; j++) {
         recurseQueens(parentNode.children[j], row + 1, 0);
       }
     }
   };
 
-  recurseQueens(root, 0, 0); //populate root with decision tree
-
-  // var rootLogger = function(root) {
-  //   if(root.depth === 4) { return root; }
-  //   if(root.children) {
-  //     for(var i = 0; i < root.children.length; i++) {
-  //       var solution = rootLogger(root.children[i]);
-  //       if(solution) {
-  //         return solution;
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // };
-
-  // var solution = rootLogger(root).board.rows();
+  recurseQueens(root, 0, 0);
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-  if(solution.length === 0) {
+  if (solution.length === 0) {
     return rootBoard.rows();
   }
   return solution;
@@ -124,8 +110,41 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = undefined; //fixme
+  if (n === 0) { return 1; }
+  var numSolutions = 0;
+  var BoardTree = function(board) {
+    this.board = board;
+    this.children = [];
+  };
+  BoardTree.prototype.addChild = function(board) {
+    this.children.push(new BoardTree(board));
+  };
+  var rootBoard = new Board({n: n});
+  var root = new BoardTree(rootBoard);
+  var rootTraveller = function(parentNode, row, col) {
+    //base case
+    if (row === n) { return; }
+    //copy parent board
+    var thisBoard = new Board({n: n});
+    thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
+    //place a queen
+    thisBoard.togglePiece(row, col);
+    //if the placement is valid
+    if (!thisBoard.hasAnyQueensConflicts()) {
+      parentNode.addChild(thisBoard);
+      if (row === n - 1) { numSolutions++; }
+    }
+    //go to the next spot
+    if (col === n - 1) {
+      for (let i = 0; i < parentNode.children.length; i++) {
+        rootTraveller(parentNode.children[i], row + 1, 0);
+      }
+    } else {
+      rootTraveller(parentNode, row, col + 1);
+    }
+  };
+  rootTraveller(root, 0, 0);
+  console.log('Number of solutions for ' + n + ' queens:', numSolutions);
 
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
-  return solutionCount;
+  return numSolutions;
 };
