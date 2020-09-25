@@ -70,23 +70,27 @@ window.findNQueensSolution = function(n) {
   var root = new BoardTree(rootBoard, 0);
 
   var recurseQueens = function(parentNode, row, col) {
-    //debugger;
     if (row === n || col === n) { return; } //base case, reached end of board
 
     var thisBoard = new Board({n: n});
-    //console.log(thisBoard.hasAnyQueensConflicts());
-    //Object.assign(thisBoard.attributes, parentNode.board.attributes);
     thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
+    //place a queen
     thisBoard.togglePiece(row, col);
+    //if the queen was a valid placement
     if (!thisBoard.hasAnyQueensConflicts()) {
+      //check if that was the final queen to place
       if (row === n - 1) {
+        //pass a correct solution
         solution = thisBoard.rows();
         return;
-      } //returns first working board
+      }
+      //queen placement was valid, add it to the valid children
       parentNode.addChild(thisBoard, parentNode.depth + 1);
-    }
+    }//queen wasn't valid, if we're not at the last column
     if (col < n - 1) {
+      //go again on the next column
       recurseQueens(parentNode, row, col + 1);
+      //otherwise,
     } else if (row < n - 1) {
       for(var j = 0; j < parentNode.children.length; j++) {
         recurseQueens(parentNode.children[j], row + 1, 0);
@@ -112,6 +116,9 @@ window.findNQueensSolution = function(n) {
   // var solution = rootLogger(root).board.rows();
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
+  if(solution.length === 0) {
+    return rootBoard.rows();
+  }
   return solution;
 };
 
