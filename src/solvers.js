@@ -71,13 +71,13 @@ window.findNQueensSolution = function(n) {
   var recurseQueens = function(parentNode, row, col) {
     if (row === n || col === n) { return; } //base case, reached end of board
 
-    var thisBoard = new Board({n: n});
-    thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
     //place a queen
-    thisBoard.togglePiece(row, col);
+    parentNode.board.togglePiece(row, col);
     //if the queen was a valid placement
-    if (!thisBoard.hasAnyQueensConflicts()) {
+    if (!parentNode.board.hasAnyQueensConflicts()) {
       //check if that was the final queen to place
+      var thisBoard = new Board({n: n});
+      thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
       if (row === n - 1) {
         //pass a correct solution
         solution = thisBoard.rows();
@@ -88,6 +88,7 @@ window.findNQueensSolution = function(n) {
       //queen placement was valid, add it to the valid children
       parentNode.addChild(thisBoard, parentNode.depth + 1);
     }//queen wasn't valid, if we're not at the last column
+    parentNode.board.togglePiece(row, col);
     if (col < n - 1) {
       //go again on the next column
       recurseQueens(parentNode, row, col + 1);
