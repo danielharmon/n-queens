@@ -67,9 +67,13 @@ window.findNQueensSolution = function(n) {
   var numSolutions = 0;
   var rootBoard = new Board({n: n});
   var root = new BoardTree(rootBoard, 0);
-
+  var end;
   var recurseQueens = function(parentNode, row, col) {
-    if (row === n || col === n) { return; } //base case, reached end of board
+
+    if (row === n || col === n) {
+      end = window.performance.now();
+      return;
+    } //base case, reached end of board
 
     //place a queen
     parentNode.board.togglePiece(row, col);
@@ -82,7 +86,8 @@ window.findNQueensSolution = function(n) {
         //pass a correct solution
         solution = thisBoard.rows();
         numSolutions++;
-        return;
+        end = window.performance.now();
+        return true;
 
       }
       //queen placement was valid, add it to the valid children
@@ -91,16 +96,25 @@ window.findNQueensSolution = function(n) {
     parentNode.board.togglePiece(row, col);
     if (col < n - 1) {
       //go again on the next column
-      recurseQueens(parentNode, row, col + 1);
+      if (recurseQueens(parentNode, row, col + 1)) {
+        return true;
+      }
       //otherwise, start each child on the next row
     } else if (row < n - 1) {
       for (var j = 0; j < parentNode.children.length; j++) {
-        recurseQueens(parentNode.children[j], row + 1, 0);
+        if (recurseQueens(parentNode.children[j], row + 1, 0)) {
+          return true;
+        }
       }
     }
+
   };
 
+  var start = window.performance.now();
+
   recurseQueens(root, 0, 0);
+
+
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
   if (solution.length === 0) {
@@ -126,16 +140,21 @@ window.countNQueensSolutions = function(n) {
     //base case
     if (row === n) { return; }
     //copy parent board
-    var thisBoard = new Board({n: n});
-    thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
+
     //place a queen
-    thisBoard.togglePiece(row, col);
+    parentNode.board.togglePiece(row, col);
     //if the placement is valid
-    if (!thisBoard.hasAnyQueensConflicts()) {
+    if (!parentNode.board.hasAnyQueensConflicts()) {
+      var thisBoard = new Board({n: n});
+      thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
       parentNode.addChild(thisBoard);
-      if (row === n - 1) { numSolutions++; }
+
+      if (row === n - 1) {
+        numSolutions++;
+      }
     }
     //go to the next spot
+    parentNode.board.togglePiece(row, col);
     if (col === n - 1) {
       for (let i = 0; i < parentNode.children.length; i++) {
         rootTraveller(parentNode.children[i], row + 1, 0);
