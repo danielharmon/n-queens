@@ -125,7 +125,8 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  if (n === 0) { return 1; }
+  if (n === 0 || n === 1) { return 1; }
+
   var numSolutions = 0;
   var BoardTree = function(board) {
     this.board = board;
@@ -139,7 +140,12 @@ window.countNQueensSolutions = function(n) {
   var rootTraveller = function(parentNode, row, col) {
     //base case
     if (row === n) { return; }
-    //copy parent board
+
+    // if (col >= n/2 && row === 0) {
+    //   for (let i = 0; i < parentNode.children.length; i++) {
+    //     rootTraveller(parentNode.children[i], row + 1, 0);
+    //   }
+    // }
 
     //place a queen
     parentNode.board.togglePiece(row, col);
@@ -147,10 +153,18 @@ window.countNQueensSolutions = function(n) {
     if (!parentNode.board.hasAnyQueensConflicts()) {
       var thisBoard = new Board({n: n});
       thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
-      parentNode.addChild(thisBoard);
+      if (row === 0 && col < n/2) {
+        parentNode.addChild(thisBoard);
+      } else if(row !== 0) {
+        parentNode.addChild(thisBoard);
+      }
 
       if (row === n - 1) {
-        numSolutions++;
+        if((n % 2 === 1) && thisBoard.attributes[0][Math.floor(n/2)] === 1){
+          numSolutions += 1;
+        } else {
+          numSolutions += 2; //counting this solution & mirrored solution
+        }
       }
     }
     //go to the next spot
