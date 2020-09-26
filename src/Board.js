@@ -54,6 +54,11 @@
       return this.hasAnyRooksConflicts() || this.hasAnyMajorDiagonalConflicts() || this.hasAnyMinorDiagonalConflicts();
     },
 
+    hasAnyQueensColOrDiagConflicts: function() {
+      return this.hasAnyColConflicts() || this.hasAnyMajorDiagonalConflicts() || this.hasAnyMinorDiagonalConflicts();
+    },
+
+
     _isInBounds: function(rowIndex, colIndex) {
       return (
         0 <= rowIndex && rowIndex < this.get('n') &&
@@ -81,9 +86,12 @@
     hasRowConflictAt: function(rowIndex) {
       var count = 0;
       for (let i = 0; i < this.attributes[rowIndex].length; i++) {
-        if (this.attributes[rowIndex][i] === 1) { count++; }
+        if (this.attributes[rowIndex][i] === 1) {
+          count++;
+          if(count > 1) { return true; }
+        }
       }
-      return (count > 1);
+      return false;
     },
 
     // test if any rows on this board contain conflicts
@@ -103,9 +111,12 @@
     hasColConflictAt: function(colIndex) {
       var count = 0;
       for (let i = 0; i < this.attributes.n; i++) {
-        if (this.attributes[i][colIndex] === 1) { count++; }
+        if (this.attributes[i][colIndex] === 1) {
+          count++;
+          if (count > 1) {return true;}
+        }
       }
-      return (count > 1);
+      return false;
     },
 
     // test if any columns on this board contain conflicts
@@ -125,17 +136,20 @@
     hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
       var row = 0;
       var col = majorDiagonalColumnIndexAtFirstRow;
-      while(!this._isInBounds(row, col)) {
+      while (!this._isInBounds(row, col)) {
         row++;
         col++;
       }
       var count = 0;
       while (this._isInBounds(row, col)) {
-        if(this.attributes[row][col] === 1) { count++; }
+        if (this.attributes[row][col] === 1) {
+          count++;
+          if (count > 1) { return true; }
+        }
         row++;
         col++;
       }
-      return (count > 1);
+      return false;
     },
 
     // test if any major diagonals on this board contain conflicts
@@ -156,17 +170,20 @@
     hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
       var row = 0;
       var col = minorDiagonalColumnIndexAtFirstRow;
-      while(!this._isInBounds(row, col)) {
+      while (!this._isInBounds(row, col)) {
         row++;
         col--;
       }
       var count = 0;
       while (this._isInBounds(row, col)) {
-        if(this.attributes[row][col] === 1) { count++; }
+        if (this.attributes[row][col] === 1) {
+          count++;
+          if (count > 1) { return true; }
+        }
         row++;
         col--;
       }
-      return (count > 1);
+      return false;
     },
 
     // test if any minor diagonals on this board contain conflicts

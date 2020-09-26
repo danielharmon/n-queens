@@ -78,7 +78,7 @@ window.findNQueensSolution = function(n) {
     //place a queen
     parentNode.board.togglePiece(row, col);
     //if the queen was a valid placement
-    if (!parentNode.board.hasAnyQueensConflicts()) {
+    if (!parentNode.board.hasAnyQueensColOrDiagConflicts()) {
       //check if that was the final queen to place
       var thisBoard = new Board({n: n});
       thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
@@ -88,7 +88,6 @@ window.findNQueensSolution = function(n) {
         numSolutions++;
         end = window.performance.now();
         return true;
-
       }
       //queen placement was valid, add it to the valid children
       parentNode.addChild(thisBoard, parentNode.depth + 1);
@@ -111,6 +110,7 @@ window.findNQueensSolution = function(n) {
   };
 
   var start = window.performance.now();
+
 
   recurseQueens(root, 0, 0);
 
@@ -137,6 +137,15 @@ window.countNQueensSolutions = function(n) {
   };
   var rootBoard = new Board({n: n});
   var root = new BoardTree(rootBoard);
+
+  for (var i = 0; i < n/2; i++) {
+    var thisBoard = new Board({n: n});
+    thisBoard.togglePiece(0, i);
+    root.addChild(thisBoard);
+  }
+
+
+
   var rootTraveller = function(parentNode, row, col) {
     //base case
     if (row === n) { return; }
@@ -150,7 +159,7 @@ window.countNQueensSolutions = function(n) {
     //place a queen
     parentNode.board.togglePiece(row, col);
     //if the placement is valid
-    if (!parentNode.board.hasAnyQueensConflicts()) {
+    if (!parentNode.board.hasAnyQueensColOrDiagConflicts()) {
       var thisBoard = new Board({n: n});
       thisBoard.attributes = JSON.parse(JSON.stringify(parentNode.board.attributes));
       if (row === 0 && col < n/2) {
@@ -177,7 +186,11 @@ window.countNQueensSolutions = function(n) {
       rootTraveller(parentNode, row, col + 1);
     }
   };
-  rootTraveller(root, 0, 0);
+
+  for (i = 0; i < n/2; i++) {
+    rootTraveller(root.children[i], 1, 0);
+  }
+  //rootTraveller(root, 0, 0);
   console.log('Number of solutions for ' + n + ' queens:', numSolutions);
 
   return numSolutions;
